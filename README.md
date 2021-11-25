@@ -1,6 +1,11 @@
-### 用于全校成绩整理与分析
+### 用于全校成绩整理与分析(v2.0)
 
 ----
+
+### 功能介绍
+
+* 自动汇总全校考试成绩，自动计算生成前45%、后30%平均分、ABCDE等率，生成excel数据表
+* 对汇总数据进行数据分析，对各年级、各班级考试情况作出考评，对分析生成数据可视化图表
 
 #### 数据输入
 
@@ -9,46 +14,38 @@
 
 #### 环境依赖
 
-* python3.0以上，安装pandas，numpy，matplotlib库
+* python3.0以上，安装pandas，matplotlib，openpyxl库
 * 安装方式：
 
 ```
 pip install pandas
-pip install numpy
 pip install matplotlib
+pip install openpyxl
 ```
 
 
 
 #### 使用方法
 
-* cd进入相应目录，运行getres.py
+* cd进入相应目录，运行main.py
 
 ```
-python getres.py
+python main.py
 ```
 
-* 在./data目录下会生成result.txt文件，再继续运行
-
-```
-python output.py
-```
-
-* 在./data目录生成result.xlsx文件，为统计汇总结果的表格
-* 运行paint.py
-
-```
-python paint.py
-```
-
-* 可以进行相应对象的数据可视化分析
+* 单击“数据汇总”按钮：在./data目录下会生成result.data文件，就是汇总后生成的全校数据
+* 单击“数据分析”按钮：对汇总后生成的数据进行计算分析和可视化呈现
 
 
 
 #### 问题解决
 
-* 输出文件未改写：将*result.txt*和*result.xlsx*内容进行清空，或直接删除该文件。
-* 输出错误：检查*data.xlsx*中有无格式错误；如有缺考，请勿填写任何内容至相应的单元格
+* 错误信息：FileNotFoundError: [Errno 2] No such file or directory: './data/data.xlsx'
+  * 原因：找不到待处理的数据源文件
+  * 解决办法：检查是否将源文件放入data目录下，并改名为"data.xlsx"；注意：拓展名为xlsx，如果为旧版本的xls，要打开文件后，另存为为xlsx后缀的文件。
+* 错误信息：ValueError: could not convert string to float: '缺考'
+  * 原因：在本该填入成绩的单元格中填入中文
+  * 解决办法：检查所有数据表，确保填入成绩的单元格中不出现中文；如有缺考、请假等特殊情况，不要填入任何内容
 
 
 

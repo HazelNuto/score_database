@@ -1,23 +1,18 @@
 # -*- coding: UTF-8 -*-
 import pandas as pd
-import numpy as np
+from pandas import DataFrame
 import math
 import matplotlib.pyplot as plt
-import numpy as np
 import xlrd
-from pandas import DataFrame
 import xlwt
-import math
 import random
 import os
 import json
 import sys
 
 dataPath = "./data/data.xlsx"
-o = dataPath
 wb = xlrd.open_workbook(dataPath)
 sheets = wb.sheet_names()
-outputfile = "./data/result.txt"
 
 class Logger(object):
     def __init__(self, filename="Default.log"):
@@ -77,14 +72,21 @@ def cal_level(score, level):
             cnt[4] += 1
     return [cnt[i]*100.0/rows for i in range(5)]
 
-def print_title():
-    print("班级 原有人数 现有人数 语文 / / / / / / / / / / 数学 / / / / / / / / / 英语 / / / / / / / 科学 / / / / / / /")
-    print("/ / / 基础 阅读 写作 总分 前45% 后30% A等率 B等率 C等率 D等率 E等率 知识技能 综合应用 总分 前45% 后30% A等率 B等率 C等率 D等率 E等率 总分 前45% 后30% A等率 B等率 C等率 D等率 E等率 总分 前45% 后30% A等率 B等率 C等率 D等率 E等率")
 
+def add_title():
+    tup = ["/", "/", "/", "基础", "阅读", "写作", "总分", "前45%", "后30%", "A等率", "B等率", "C等率", "D等率", "E等率",
+    "知识技能", "综合应用", "总分", "前45%", "后30%", "A等率", "B等率", "C等率", "D等率", "E等率", "总分", "前45%", "后30%", "A等率", "B等率", "C等率", "D等率", "E等率", "总分", "前45%", "后30%",
+    "A等率", "B等率", "C等率", "D等率", "E等率"]
+    return tup
+
+'''
+输出为txt
+outputfile = "./data/result.txt"
 df_28 = DataFrame()
 path = os.path.abspath(os.path.dirname(__file__))
 type = sys.getfilesystemencoding()
 sys.stdout = Logger(outputfile)
+'''
 
 inputfile = pd.read_excel(dataPath, sheet_name=None)
 class_lst = list(inputfile)
@@ -187,54 +189,99 @@ for i in range(6): #划分等第
     grade_e_level[i] = cal_grade_levelscore(grade_e_score[i], grade_e[i<<1|1])
     grade_s_level[i] = cal_grade_levelscore(grade_s_score[i], grade_s[i<<1|1])
 
-def output_res():
-    grade = 1
-    print_title()
-    for i in range(0, class_cnt): #计算和输出
-        new_grade = int(str(class_lst[i])[0]) - 1
-        if grade != new_grade: #一个年级处理完
-            print("%d年级" % (grade+1), end = ' ')
-            print("/ / / / / %.2f / / / / / / / / / %.2f" % ( grade_c[grade<<1] / grade_c[grade<<1|1], grade_m[grade<<1] / grade_m[grade<<1|1] ), end = ' ')
-            if grade_e[grade<<1|1] != 0:
-                print("/ / / / / / / %.2f" % (grade_e[grade<<1] / grade_e[grade<<1|1]), end = ' ')
-            if grade_s[grade<<1|1] != 0:
-                print("/ / / / / / / %.2f" % (grade_s[grade<<1] / grade_s[grade<<1|1]), end = ' ')
-            print("\n")
-            print_title()
-        grade = new_grade
+output_lst = []
+grade = 0
+#print_title()
+output_lst.append(add_title())
+for i in range(0, class_cnt): #计算和输出
+    new_grade = int(str(class_lst[i])[0]) - 1
+    if grade != new_grade and grade_c[grade<<1|1] != 0: #一个年级处理完
+        tup = []
+        tup.append("%d年级" % (grade+1))
+        for ii in range(5):
+            tup.append("/")
+        tup.append("%.2f" %  (grade_c[grade<<1] / grade_c[grade<<1|1]) )
+        for ii in range(9):
+            tup.append("/")
+        tup.append("%.2f" %  (grade_m[grade<<1] / grade_m[grade<<1|1]) )
+        
+        if grade_e[grade<<1|1] != 0:
+            for ii in range(7):
+                tup.append("/")
+            tup.append("%.2f" %  (grade_e[grade<<1] / grade_e[grade<<1|1]) )
+        if grade_s[grade<<1|1] != 0:
+            for ii in range(7):
+                tup.append("/")
+            tup.append("%.2f" %  (grade_s[grade<<1] / grade_s[grade<<1|1]) )
+        output_lst.append(tup)
+        output_lst.append([""])
+        output_lst.append(add_title())
+    grade = new_grade
 
-        c_bef_end = cal_bef_end(class_c_score[i], class_c_cnt[i])
-        m_bef_end = cal_bef_end(class_m_score[i], class_m_cnt[i])
-        e_bef_end = cal_bef_end(class_e_score[i], class_e_cnt[i])
-        s_bef_end = cal_bef_end(class_s_score[i], class_s_cnt[i])
-        c_level = cal_level(class_c_score[i], grade_c_level[grade])
-        m_level = cal_level(class_m_score[i], grade_m_level[grade])
-        e_level = cal_level(class_e_score[i], grade_e_level[grade])
-        s_level = cal_level(class_s_score[i], grade_s_level[grade])
+    c_bef_end = cal_bef_end(class_c_score[i], class_c_cnt[i])
+    m_bef_end = cal_bef_end(class_m_score[i], class_m_cnt[i])
+    e_bef_end = cal_bef_end(class_e_score[i], class_e_cnt[i])
+    s_bef_end = cal_bef_end(class_s_score[i], class_s_cnt[i])
+    c_level = cal_level(class_c_score[i], grade_c_level[grade])
+    m_level = cal_level(class_m_score[i], grade_m_level[grade])
+    e_level = cal_level(class_e_score[i], grade_e_level[grade])
+    s_level = cal_level(class_s_score[i], grade_s_level[grade])
 
-        print("%s %d %d" % ( class_lst[i], class_rows[i], max(max(class_c_cnt[i],class_m_cnt[i]),max(class_e_cnt[i],class_s_cnt[i])) ), end=' ') #班级编号，班级人数，实际人数
-        print("%.2f %.2f %.2f %.2f %.2f %.2f" % ( class_c[i][0] / class_c_cnt[i], class_c[i][1] / class_c_cnt[i], class_c[i][2] / class_c_cnt[i], class_c[i][3] / class_c_cnt[i], c_bef_end[0], c_bef_end[1] ), end =' ') #语文分值
+    tup = [] #班级编号，班级人数，实际人数
+    tup.append(class_lst[i])
+    tup.append("%d" % (class_rows[i]) )
+    tup.append("%d" % ( max(max(class_c_cnt[i],class_m_cnt[i]),max(class_e_cnt[i],class_s_cnt[i])) ) )
+    tup.append("%.2f" % (class_c[i][0] / class_c_cnt[i]) )
+    tup.append("%.2f" % (class_c[i][1] / class_c_cnt[i]) )
+    tup.append("%.2f" % (class_c[i][2] / class_c_cnt[i]) )
+    tup.append("%.2f" % (class_c[i][3] / class_c_cnt[i]) )
+    tup.append("%.2f" % (c_bef_end[0]) )
+    tup.append("%.2f" % (c_bef_end[1]) )
+    for j in range(5):
+        tup.append("%.2f%%" % (c_level[j]) )
+    tup.append("%.2f" % (class_m[i][0] / class_m_cnt[i]) )
+    tup.append("%.2f" % (class_m[i][1] / class_m_cnt[i]) )
+    tup.append("%.2f" % (class_m[i][2] / class_m_cnt[i]) )
+    tup.append("%.2f" % (m_bef_end[0]) )
+    tup.append("%.2f" % (m_bef_end[1]) )
+    for j in range(5):
+        tup.append("%.2f%%" % (m_level[j]) )
+    if class_e_cnt[i] != 0:
+        tup.append("%.2f" % (class_e[i] / class_e_cnt[i]) )
+        tup.append("%.2f" % (e_bef_end[0]) )
+        tup.append("%.2f" % (e_bef_end[1]) )
         for j in range(5):
-            print("%.2f" % (c_level[j]), end = '% ')
-        print("%.2f %.2f %.2f %.2f %.2f" % ( class_m[i][0] / class_m_cnt[i], class_m[i][1] / class_m_cnt[i], class_m[i][2] / class_m_cnt[i], m_bef_end[0], m_bef_end[1] ), end = ' ') #数学分值
+            tup.append("%.2f%%" % (e_level[j]) )
+    if class_s_cnt[i] != 0:
+        tup.append("%.2f" % (class_s[i] / class_s_cnt[i]) )
+        tup.append("%.2f" % (s_bef_end[0]) )
+        tup.append("%.2f" % (s_bef_end[1]) )
         for j in range(5):
-            print("%.2f" % (m_level[j]), end = '% ')
-        if class_e_cnt[i] != 0:
-            print("%.2f %.2f %.2f" % ( class_e[i] / class_e_cnt[i], e_bef_end[0], e_bef_end[1] ), end = ' ')
-            for j in range(5):
-                print("%.2f" % (e_level[j]), end = '% ')
-        if class_s_cnt[i] != 0:
-            print("%.2f %.2f %.2f" % ( class_s[i] / class_s_cnt[i], s_bef_end[0], s_bef_end[1] ), end = ' ')
-            for j in range(5):
-                print("%.2f" % (s_level[j]), end = '% ')
-        print()
+            tup.append("%.2f%%" % (s_level[j]) )
+    #print()
+    output_lst.append(tup)
 
-    print("%d年级" % (grade+1), end = ' ')
-    print("/ / / / / %.2f / / / / / / / / / %.2f" % ( grade_c[grade<<1] / grade_c[grade<<1|1], grade_m[grade<<1] / grade_m[grade<<1|1] ), end = ' ')
-    if grade_e[grade<<1|1] != 0:
-        print("/ / / / / / / %.2f" % (grade_e[grade<<1] / grade_e[grade<<1|1]), end = ' ')
-    if grade_s[grade<<1|1] != 0:
-        print("/ / / / / / / %.2f" % (grade_s[grade<<1] / grade_s[grade<<1|1]), end = ' ')
-    print("\n")
+tup = []
+tup.append("%d年级" % (grade+1))
+for ii in range(5):
+    tup.append("/")
+tup.append("%.2f" %  (grade_c[grade<<1] / grade_c[grade<<1|1]) )
+for ii in range(9):
+    tup.append("/")
+tup.append("%.2f" %  (grade_m[grade<<1] / grade_m[grade<<1|1]) )
+if grade_e[grade<<1|1] != 0:
+    for ii in range(7):
+        tup.append("/")
+    tup.append("%.2f" %  (grade_e[grade<<1] / grade_e[grade<<1|1]) )
+if grade_s[grade<<1|1] != 0:
+    for ii in range(7):
+        tup.append("/")
+    tup.append("%.2f" %  (grade_s[grade<<1] / grade_s[grade<<1|1]) )
+output_lst.append(tup)
 
-output_res()
+def _print(llist, output_path):
+    df = pd.DataFrame(llist, columns = ["班级","原有人数","现有人数","语文", "", "", "", "" ,"" ,"", "" ,"" ,"", "", "数学", 
+    "" ,"", "", "", ",", "", "", "", "", "英语", "", "", "", "", "", "", "", "科学", "", "", "", "", "", "", ""]) #list转dataframe
+    df.to_excel(output_path, index=False) #保存到本地excel
+    
+_print(output_lst, "./data/result.xls")
